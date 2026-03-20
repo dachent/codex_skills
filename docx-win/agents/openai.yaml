@@ -1,0 +1,3 @@
+interface:
+  display_name: "DOCX Win"
+  short_description: "native microsoft word automation for windows docx workflows"

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { DatabaseSync } from 'node:sqlite'
+import { spawnSync } from 'node:child_process'
 import { readState, writeState, STATE_DEFAULT } from '../lib/state.mjs'
 import { run as extractSessions } from '../phases/extract-sessions.mjs'
 import {
@@ -16,6 +16,19 @@ import { captureSessionEvidence, verifySessionEvidence } from '../lib/session-ev
 
 async function tempFolder(label) {
   return mkdtemp(join(tmpdir(), `document-handoff-${label}-`))
+}
+
+function runPython(script, args = []) {
+  const defaults = process.platform === 'win32' ? ['python', 'py'] : ['python3', 'python']
+  const commands = [process.env.PYTHON, ...defaults].filter((value, index, values) =>
+    value && values.indexOf(value) === index)
+  for (const command of commands) {
+    const result = spawnSync(command, ['-c', script, ...args], { encoding: 'utf8', windowsHide: true })
+    if (result.error?.code === 'ENOENT') continue
+    assert.equal(result.status, 0, result.stderr || 'Python fixture creation failed')
+    return
+  }
+  assert.fail('Python 3 is required for the Hermes adapter test')
 }
 
 test('adapter registry covers the supported harnesses and generic JSONL', () => {
@@ -100,14 +113,18 @@ test('Hermes adapter exports selected sessions from a read transaction', async (
   const root = await tempFolder('hermes')
   try {
     const dbPath = join(root, 'state.db')
-    const db = new DatabaseSync(dbPath)
-    db.exec('CREATE TABLE sessions (id TEXT PRIMARY KEY, cwd TEXT)')
-    db.exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, session_id TEXT, role TEXT, content TEXT)')
-    db.prepare('INSERT INTO sessions VALUES (?, ?)').run('keep', root)
-    db.prepare('INSERT INTO sessions VALUES (?, ?)').run('skip', root)
-    db.prepare('INSERT INTO messages(session_id, role, content) VALUES (?, ?, ?)').run('keep', 'user', 'captured')
-    db.prepare('INSERT INTO messages(session_id, role, content) VALUES (?, ?, ?)').run('skip', 'user', 'not captured')
-    db.close()
+    runPython([
+      'import sqlite3, sys',
+      'db = sqlite3.connect(sys.argv[1])',
+      'db.execute("CREATE TABLE sessions (id TEXT PRIMARY KEY, cwd TEXT)")',
+      'db.execute("CREATE TABLE messages (id INTEGER PRIMARY KEY, session_id TEXT, role TEXT, content TEXT)")',
+      'db.execute("INSERT INTO sessions VALUES (?, ?)", ("keep", sys.argv[2]))',
+      'db.execute("INSERT INTO sessions VALUES (?, ?)", ("skip", sys.argv[2]))',
+      'db.execute("INSERT INTO messages(session_id, role, content) VALUES (?, ?, ?)", ("keep", "user", "captured"))',
+      'db.execute("INSERT INTO messages(session_id, role, content) VALUES (?, ?, ?)", ("skip", "user", "not captured"))',
+      'db.commit()',
+      'db.close()',
+    ].join('\n'), [dbPath, root])
 
     const sessions = await discoverSessions(root, {
       providers: [{ type: 'hermes', database: dbPath, session_ids: ['keep'] }],

@@ -1,8 +1,10 @@
 import { createReadStream } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
+import { spawnSync } from 'node:child_process'
 import { join, basename, dirname, resolve } from 'node:path'
 import { homedir } from 'node:os'
 import { createInterface } from 'node:readline'
+import { fileURLToPath } from 'node:url'
 
 const JSONL_EXT = '.jsonl'
 
@@ -255,16 +257,22 @@ async function discoverKimi(sourceRoot, spec = {}) {
   return found
 }
 
-function quoteIdentifier(value) {
-  return `"${String(value).replace(/"/g, '""')}"`
-}
+const HERMES_SQLITE_BRIDGE = fileURLToPath(new URL('./hermes_sqlite.py', import.meta.url))
 
-function tableColumns(db, table) {
-  return db.prepare(`PRAGMA table_info(${quoteIdentifier(table)})`).all().map(row => String(row.name))
-}
-
-function firstColumn(columns, names) {
-  return names.find(name => columns.includes(name)) || null
+function runHermesSqlite(request) {
+  const defaults = process.platform === 'win32' ? ['python', 'py'] : ['python3', 'python']
+  const commands = [process.env.PYTHON, ...defaults].filter((value, index, values) =>
+    value && values.indexOf(value) === index)
+  for (const command of commands) {
+    const result = spawnSync(command, [HERMES_SQLITE_BRIDGE], {
+      input: JSON.stringify(request), encoding: 'utf8', windowsHide: true,
+      maxBuffer: 256 * 1024 * 1024,
+    })
+    if (result.error?.code === 'ENOENT') continue
+    if (result.status !== 0) throw new Error('Hermes SQLite bridge failed')
+    try { return JSON.parse(result.stdout) } catch { throw new Error('Hermes SQLite bridge returned invalid JSON') }
+  }
+  throw new Error('Hermes session capture requires Python 3')
 }
 
 async function discoverHermes(sourceRoot, spec = {}) {
@@ -272,38 +280,28 @@ async function discoverHermes(sourceRoot, spec = {}) {
     ? join(process.env.LOCALAPPDATA, 'hermes')
     : join(homedir(), '.hermes')
   const path = spec.database || spec.path || join(defaultRoot, 'state.db')
-  let db
-  try {
-    const { DatabaseSync } = await import('node:sqlite')
-    // Native filesystem paths are deliberate: file: URIs reject Windows UNC authorities.
-    db = new DatabaseSync(path, { readOnly: true })
-    db.exec('PRAGMA query_only=ON')
-    const tables = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(row => row.name))
-    const sessionTable = spec.session_table || 'sessions'
-    if (!tables.has(sessionTable)) return []
-    const columns = tableColumns(db, sessionTable)
-    const idColumn = spec.id_column || firstColumn(columns, ['id', 'session_id', 'sessionId'])
-    if (!idColumn) return []
-    const cwdColumn = spec.cwd_column || firstColumn(columns, ['cwd', 'project_path', 'workspace_path', 'workspace'])
-    const rows = db.prepare(`SELECT * FROM ${quoteIdentifier(sessionTable)}`).all()
-    const found = []
-    for (const row of rows) {
-      const id = String(row[idColumn])
-      const cwd = cwdColumn ? row[cwdColumn] : null
-      if (!selectedByIdOrProject(id, cwd, sourceRoot, spec)) continue
-      found.push({
-        provider: 'hermes', adapter: 'hermes', kind: 'sqlite-session', path,
-        session_id: id, session_name: id, active: Boolean(spec.active),
-        metadata: { cwd: cwd || null },
-        sqlite: { session_table: sessionTable, id_column: idColumn },
-      })
-    }
-    return found
-  } catch {
-    return []
-  } finally {
-    try { db?.close() } catch {}
+  const sessionTable = spec.session_table || 'sessions'
+  const result = runHermesSqlite({
+    action: 'discover', database: path, session_table: sessionTable,
+    id_column: spec.id_column || null, cwd_column: spec.cwd_column || null,
+    session_ids: [...selectedIds(spec)],
+  })
+  const idColumn = result.id_column
+  if (!idColumn) return []
+  const cwdColumn = result.cwd_column
+  const found = []
+  for (const row of result.rows || []) {
+    const id = String(row[idColumn])
+    const cwd = cwdColumn ? row[cwdColumn] : null
+    if (!selectedByIdOrProject(id, cwd, sourceRoot, spec)) continue
+    found.push({
+      provider: 'hermes', adapter: 'hermes', kind: 'sqlite-session', path,
+      session_id: id, session_name: id, active: Boolean(spec.active),
+      metadata: { cwd: cwd || null },
+      sqlite: { session_table: sessionTable, id_column: idColumn },
+    })
   }
+  return found
 }
 
 function manualSources(config = {}) {
@@ -400,30 +398,12 @@ export async function extractKimi(jsonlPath) {
 }
 
 export async function exportHermesRows(session) {
-  const { DatabaseSync } = await import('node:sqlite')
-  let db
-  try {
-    db = new DatabaseSync(session.path, { readOnly: true })
-    db.exec('PRAGMA query_only=ON')
-    db.exec('BEGIN')
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all()
-    const rows = []
-    for (const { name } of tables) {
-      const columns = tableColumns(db, name)
-      const key = name === session.sqlite?.session_table
-        ? session.sqlite?.id_column
-        : firstColumn(columns, ['session_id', 'sessionId', 'session'])
-      if (!key) continue
-      const values = db.prepare(
-        `SELECT * FROM ${quoteIdentifier(name)} WHERE ${quoteIdentifier(key)} = ?`
-      ).all(session.session_id)
-      for (const row of values) rows.push({ table: name, row })
-    }
-    db.exec('ROLLBACK')
-    return rows
-  } finally {
-    try { db?.close() } catch {}
-  }
+  const result = runHermesSqlite({
+    action: 'export', database: session.path, session_id: session.session_id,
+    session_table: session.sqlite?.session_table || 'sessions',
+    id_column: session.sqlite?.id_column || 'id',
+  })
+  return result.rows || []
 }
 
 export async function extractHermes(session) {

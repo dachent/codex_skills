@@ -38,6 +38,8 @@
 
 Provider entries accept `session_ids` to select known sessions and `cwd_prefixes` to add project roots. Kimi entries also accept `workspace_ids`. Hermes entries may override `session_table`, `id_column`, and `cwd_column` for a compatible schema. Explicit `sources` are the extension point for any JSONL-producing harness without a built-in adapter.
 
+Hermes capture requires Python 3 and uses only its standard-library `sqlite3` module. The Node CLI remains compatible with Node 20.
+
 ## Evidence contract
 
 Raw evidence is written below `.handoff/session-evidence/`:

@@ -12,6 +12,7 @@
 - agent-context.json exists and parseable
 - citation-index.json exists
 - Catalog copy integrity: SHA256 of copied files matches catalog entry
+- Session evidence integrity: each captured blob's size and SHA-256 match `session-evidence/manifest.json`
 
 ## verification.json schema
 

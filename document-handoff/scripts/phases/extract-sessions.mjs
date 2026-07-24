@@ -1,39 +1,57 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { readState, writeState } from '../lib/state.mjs'
-import { findCCSessions, findCodexSessions, extractCC, extractCodex, normalizeExtract } from '../lib/providers.mjs'
+import { discoverSessions, extractSession, normalizeExtract } from '../lib/providers.mjs'
+import { captureSessionEvidence } from '../lib/session-evidence.mjs'
+
+function safeName(value) {
+  return String(value).replace(/[^a-z0-9._-]/gi, '-').slice(0, 180)
+}
 
 export async function run(statePath) {
   const state = await readState(statePath)
-  const { source_root: src, output_dir: out } = state
+  const { source_root: sourceRoot, output_dir: outputDir } = state
+  const config = state.session_capture || { providers: ['claude-code', 'codex'], capture_raw: true }
+  const sessions = await discoverSessions(sourceRoot, config)
 
-  const [ccSessions, codexSessions] = await Promise.all([
-    findCCSessions(src),
-    findCodexSessions(src)
-  ])
-  const allSessions = [...ccSessions, ...codexSessions]
-
-  if (allSessions.length === 0) {
+  if (sessions.length === 0) {
     console.log('⚠️  No sessions found for this source root.')
     console.log('GATE: Set sessions_validated:true in state.json manually if you want to continue without sessions.')
     return
   }
 
-  console.log('\nSessions found:')
-  allSessions.forEach((s, i) => console.log(`  ${i + 1}. [${s.provider}] ${s.session_name}`))
-  console.log('\nGATE: Review sessions above. Set sessions_validated:true in state.json to proceed.')
+  console.log('\nSessions and supporting sources found:')
+  sessions.forEach((session, index) => {
+    console.log(`  ${index + 1}. [${session.provider}] ${session.session_name} (${session.kind})`)
+  })
+  console.log('\nGATE: Review the sources above. Set sessions_validated:true in state.json to proceed.')
 
-  const tmpDir = join(out, '.handoff', 'tmp')
+  const tmpDir = join(outputDir, '.handoff', 'tmp')
   await mkdir(tmpDir, { recursive: true })
-
-  for (const s of allSessions) {
-    const msgs = s.provider === 'claude-code' ? await extractCC(s.path) : await extractCodex(s.path)
-    const normalized = normalizeExtract(msgs, s.provider, s.session_name)
-    await writeFile(join(tmpDir, `${s.session_name}_extract.txt`), normalized)
+  const nameCounts = new Map()
+  for (const session of sessions.filter(item => item.kind !== 'supporting')) {
+    const stem = safeName(session.session_name)
+    nameCounts.set(stem, (nameCounts.get(stem) || 0) + 1)
+  }
+  for (const session of sessions) {
+    if (session.kind === 'supporting') continue
+    const messages = await extractSession(session)
+    const normalized = normalizeExtract(messages, session.provider, session.session_name)
+    const stem = safeName(session.session_name)
+    const name = nameCounts.get(stem) > 1
+      ? `${safeName(session.provider)}-${stem}_extract.txt`
+      : `${stem}_extract.txt`
+    await writeFile(join(tmpDir, name), normalized)
   }
 
-  state.sessions_found = allSessions
-  state.phases_completed.push('extract-sessions')
+  if (config.capture_raw !== false) {
+    const evidence = await captureSessionEvidence(sessions, outputDir, config)
+    state.session_evidence_path = evidence.manifestPath
+    console.log(`✓ Captured ${evidence.manifest.source_count} evidence sources (${evidence.manifest.unique_blob_count} unique blobs)`)
+  }
+
+  state.sessions_found = sessions
+  if (!state.phases_completed.includes('extract-sessions')) state.phases_completed.push('extract-sessions')
   await writeState(statePath, state)
-  console.log(`✓ Extracted ${allSessions.length} sessions to ${tmpDir}`)
+  console.log(`✓ Extracted ${sessions.length} sessions/sources to ${tmpDir}`)
 }

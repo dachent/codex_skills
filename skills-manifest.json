@@ -277,7 +277,7 @@
       "family": "handoff",
       "catalog_group": "repository-owned",
       "status": "supported",
-      "description": "Create a comprehensive cross-harness project archive and handoff package: curated workfolder copy, evidence and state, agent context, and dark-mode HTML memo. Use for milestone archives and cold-start continuation; distinct from a lightweight session handoff.",
+      "description": "Create a comprehensive cross-harness project archive and handoff package with content-addressed Codex, Claude Code, Kimi Code, Hermes, or declared session evidence. Use for milestone archives and cold-start continuation; distinct from a lightweight session handoff.",
       "platforms": [
         "cross-platform"
       ],
@@ -305,7 +305,7 @@
         "environment_dependent_commands": []
       },
       "owner": "@dachent",
-      "last_reviewed": "2026-07-12"
+      "last_reviewed": "2026-07-24"
     },
     {
       "name": "docx-win",

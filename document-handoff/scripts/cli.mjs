@@ -56,10 +56,14 @@ if (phase === 'init') {
   const { STATE_DEFAULT, writeState, readState } = await import('./lib/state.mjs')
   const { detectProvider } = await import('./lib/providers.mjs')
   const statePath = flags.state || `${flags['output-dir'] || '.'}/.handoff/state.json`
+  let sessionCapture = STATE_DEFAULT.session_capture
+  if (flags['session-config']) {
+    sessionCapture = JSON.parse(await readFile(flags['session-config'], 'utf8'))
+  }
   let state = { ...STATE_DEFAULT, project: flags.project || 'unnamed',
     source_root: flags['source-root'] || process.cwd(),
     output_dir: flags['output-dir'] || process.cwd(),
-    created_at: new Date().toISOString(), provider: detectProvider() }
+    created_at: new Date().toISOString(), provider: detectProvider(), session_capture: sessionCapture }
   if (flags.resume) {
     try {
       const ex = await readState(statePath)

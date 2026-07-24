@@ -70,3 +70,26 @@ test('verify: writes verification.json', async () => {
   assert.ok('overall' in v)
   await rm(out, { recursive: true, force: true })
 })
+
+test('verify: fails when captured session evidence no longer matches its manifest', async () => {
+  const { out, statePath } = await makeVerifyFixture(allSections())
+  const evidenceRoot = join(out, '.handoff', 'session-evidence')
+  const blobPath = join(evidenceRoot, 'blobs', 'sha256', '00', 'bad.jsonl')
+  await mkdir(join(evidenceRoot, 'blobs', 'sha256', '00'), { recursive: true })
+  await writeFile(blobPath, 'changed\n')
+  const manifestPath = join(evidenceRoot, 'manifest.json')
+  await writeFile(manifestPath, JSON.stringify({
+    schema_version: 1,
+    sources: [{ blob_path: 'blobs/sha256/00/bad.jsonl', bytes: 8, sha256: '0'.repeat(64) }],
+  }))
+  const state = await readState(statePath)
+  state.session_evidence_path = manifestPath
+  await writeState(statePath, state)
+
+  await verify(statePath, mockAgent)
+  const verifiedState = await readState(statePath)
+  const result = JSON.parse(await readFile(verifiedState.verification_path, 'utf8'))
+  assert.equal(verifiedState.verified, false)
+  assert.equal(result.additional.session_evidence_integrity, false)
+  await rm(out, { recursive: true, force: true })
+})

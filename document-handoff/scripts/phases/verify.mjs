@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { readState, writeState } from '../lib/state.mjs'
 import { createHash } from 'node:crypto'
+import { verifySessionEvidence } from '../lib/session-evidence.mjs'
 
 const CHECK_SCHEMA = {
   type: 'object',
@@ -21,7 +22,8 @@ export async function run(statePath, agentFn) {
       bootstrap_present: false,
       agent_context_exists: false,
       citation_index_exists: false,
-      catalog_integrity: true
+      catalog_integrity: true,
+      session_evidence_integrity: null
     },
     overall: false
   }
@@ -53,6 +55,21 @@ export async function run(statePath, agentFn) {
   result.additional.agent_context_exists = await stat(agent_context_path).then(() => true).catch(() => false)
   const citationPath = join(out, '.handoff', `${project}-citation-index.json`)
   result.additional.citation_index_exists = await stat(citationPath).then(() => true).catch(() => false)
+
+  if (state.session_evidence_path) {
+    try {
+      const evidence = await verifySessionEvidence(state.session_evidence_path)
+      result.additional.session_evidence_integrity = evidence.passed
+      if (!evidence.passed) {
+        result.structural.passed = false
+        result.structural.checks.push(`Session evidence integrity failed: ${evidence.failures.length} blob(s)`)
+      }
+    } catch {
+      result.additional.session_evidence_integrity = false
+      result.structural.passed = false
+      result.structural.checks.push('Session evidence manifest is unreadable or invalid')
+    }
+  }
 
   // Catalog copy integrity (always runs — no SDK needed)
   for (const e of (state.file_inventory || []).filter(x => x.action === 'copy' && x.sha256)) {

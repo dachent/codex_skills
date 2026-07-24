@@ -54,7 +54,7 @@ Original or locally imported workflows whose current implementation is maintaine
 | [`agent-project-orchestrator`](./agent-project-orchestrator) | Deprecated for Claude Code and Codex GPT-5.6 Sol: use predecessor gist cdc05151d047708c290bd4da0aaeed96 for the original Claude workflow or native Codex planning and execution controls. | repo owned original |
 | [`code-intelligence`](./code-intelligence) | Claude Code-only explicit provider router for assessing installed Graphify, code-mapper, or selective CodeQL routes. Not for Codex GPT-5.6 Sol, whose native inspection, Plan Mode, explorer work, and subagents cover this function without an added analyzer. | repo owned original |
 | [`code-mapper-skill`](./code-mapper-skill) | Generate deterministic Python import, reference, artifact, contract, catalog, OpenLineage, and explicitly authorized local CodeQL maps. Use for explicit blast-radius, caller, contract, lineage, or local value/taint evidence requests against an approved local worktree. | repo owned original |
-| [`document-handoff`](./document-handoff) | Create a comprehensive cross-harness project archive and handoff package: curated workfolder copy, evidence and state, agent context, and dark-mode HTML memo. Use for milestone archives and cold-start continuation; distinct from a lightweight session handoff. | local source import |
+| [`document-handoff`](./document-handoff) | Create a comprehensive cross-harness project archive and handoff package with content-addressed Codex, Claude Code, Kimi Code, Hermes, or declared session evidence. Use for milestone archives and cold-start continuation; distinct from a lightweight session handoff. | local source import |
 
 ### Codex design extension pack
 

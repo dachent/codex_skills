@@ -52,7 +52,7 @@ Ask the user (or infer from context):
 3. **Output directory** — where to write the workfolder and memo. Honor the active harness/session output policy when one exists; otherwise default to `<source_root>\.handoff-output`.
 4. **Fresh or resume?** — `--fresh` overwrites existing state; `--resume` continues from last completed phase
 
-**Provider detection note:** The skill auto-detects Claude Code or Codex via environment variables. OpenCode session discovery is not currently implemented.
+**Provider detection note:** The default session adapters discover Claude Code and Codex. A session-capture JSON file can also enable Kimi Code, Hermes SQLite, or declared JSONL/supporting sources from another harness. See [references/session-capture.md](references/session-capture.md).
 
 ```powershell
 $slug = "<project-slug>"
@@ -68,6 +68,8 @@ $statePath = "$outputDir\.handoff\state.json"
 ```powershell
 node --no-warnings $cli init --project $slug --source-root $sourceRoot --output-dir $outputDir --fresh
 ```
+
+For multi-harness or explicit-source capture, add `--session-config <absolute-path-to-config.json>`.
 
 ---
 
@@ -98,6 +100,8 @@ node --no-warnings $cli populate --state $statePath
 ```powershell
 node --no-warnings $cli extract-sessions --state $statePath
 ```
+
+Unless `capture_raw:false` is configured, this phase also creates content-addressed raw evidence under `.handoff/session-evidence/`. Active JSONL logs are captured as verified complete-record prefixes; Hermes sessions are exported from a read transaction. This phase does not add an ACL or privacy-classification gate.
 
 **GATE:** Review the sessions listed above. Confirm these are the right sessions for this project.
 
@@ -158,6 +162,8 @@ Review `$outputDir\.handoff\verification.json`. If `overall: false`, fix the rep
 | `$outputDir\.handoff\catalog.json` | Full file inventory with risk flags |
 | `$outputDir\.handoff\catalog.html` | Visual catalog browser |
 | `$outputDir\.handoff\digests.json` | Session digests |
+| `$outputDir\.handoff\session-evidence\manifest.json` | Multi-harness raw-evidence manifest |
+| `$outputDir\.handoff\session-evidence\checksums.sha256` | Content-addressed evidence checksums |
 | `$outputDir\.handoff\synthesis.md` | Synthesis narrative |
 | `$outputDir\.handoff\verification.json` | Verification results |
 | `$outputDir\.handoff\{slug}-citation-index.json` | Citation graph |

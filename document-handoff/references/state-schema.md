@@ -12,10 +12,12 @@ state.json lives at `$output_dir/.handoff/state.json`. Written atomically (temp-
 | created_at | ISO-8601 | init | First init timestamp |
 | resumed_at | ISO-8601\|null | init --resume | Resume timestamp |
 | provider | string | init | 'claude-code'\|'codex'\|'unknown' |
+| session_capture | object | init | Provider/source configuration; defaults to Claude Code + Codex with raw capture |
 | copy_strategy | 'flat'\|'path-preserving'\|null | discover | Set after collision detection |
 | phases_completed | string[] | each phase | Phase names that completed successfully |
-| sessions_found | object[] | extract | {provider,path,session_name} |
+| sessions_found | object[] | extract | Provider-neutral source descriptors with adapter, kind, path, and session ID |
 | sessions_validated | boolean | extract gate | User confirmed session list |
+| session_evidence_path | string\|null | extract | Path to the content-addressed raw-evidence manifest |
 | file_inventory | object[] | discover | Full catalog entries array |
 | catalog_path | string\|null | discover | Path to catalog.html |
 | catalog_json_path | string\|null | discover | Path to catalog.json |

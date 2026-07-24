@@ -1,4 +1,4 @@
 interface:
   display_name: "Document Handoff"
-  short_description: "Create comprehensive cross-harness project archives"
-  default_prompt: "Use $document-handoff to create a comprehensive milestone archive with a curated workfolder, evidence and state, agent context, and browsable HTML memo."
+  short_description: "Create cross-harness project and session archives"
+  default_prompt: "Use $document-handoff to create a comprehensive milestone archive with a curated workfolder, multi-harness session evidence, agent context, and browsable HTML memo."

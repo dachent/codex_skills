@@ -2,11 +2,11 @@
 
 Phase 0:
 
-Run /mattpocock:grill-with-docs to validate, expand, and sharpen the draft success criteria, failure criteria, and out-of-scope boundaries — user brings draft, do not establish from scratch; select model (Phases 1–3 read-heavy → Sonnet; Phase 8b execution → Sonnet or Opus depending on COM complexity); estimate complexity and context window requirements; then run /mattpocock:handoff; then stop for PROCEED.
+Run /mattpocock:grill-with-docs to validate, expand, and sharpen the draft success criteria, failure criteria, and out-of-scope boundaries — user brings draft, do not establish from scratch; select model (Phases 1–3 read-heavy → Sonnet; Phase 8b execution → Sonnet or Opus depending on COM complexity); estimate complexity and context window requirements; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 1:
 
-Catalog all relevant files, logs, code, inputs, outputs, and dependencies using the following metadata for each: [what it is | attempt it belongs to | outcome: succeeded / failed / partial / unreached | failure mechanism if known]; then run /mattpocock:handoff; then stop for PROCEED.
+Catalog all relevant files, logs, code, inputs, outputs, and dependencies using the following metadata for each: [what it is | attempt it belongs to | outcome: succeeded / failed / partial / unreached | failure mechanism if known]; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 2a:
 
@@ -14,27 +14,27 @@ Inspect all cataloged materials; classify relevance; fully review high-relevance
 
 Phase 2b:
 
-Run /superpowers:systematic-debugging on the failure corpus to construct a failure autopsy: root causes, decision points where wrong paths were taken, partial completion state, and what was actually accomplished; output a Dead Ends Registry (approaches NOT to pursue); then run /mattpocock:handoff; then stop for PROCEED.
+Run /superpowers:systematic-debugging on the failure corpus to construct a failure autopsy: root causes, decision points where wrong paths were taken, partial completion state, and what was actually accomplished; output a Dead Ends Registry (approaches NOT to pursue); then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 3:
 
-Run /mattpocock:grill-with-docs on the synthesis and Dead Ends Registry to expose missing assumptions, risks, and edge cases — challenging against the actual failure corpus, not abstract assumptions; update Dead Ends Registry with newly identified eliminations; then run /mattpocock:handoff; then stop for PROCEED.
+Run /mattpocock:grill-with-docs on the synthesis and Dead Ends Registry to expose missing assumptions, risks, and edge cases — challenging against the actual failure corpus, not abstract assumptions; update Dead Ends Registry with newly identified eliminations; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 4:
 
-Run targeted low-cost high-impact probes to validate the critical assumptions surviving Phase 3; eliminate probe-failed paths; update Dead Ends Registry; then run /mattpocock:handoff; then stop for PROCEED.
+Run targeted low-cost high-impact probes to validate the critical assumptions surviving Phase 3; eliminate probe-failed paths; update Dead Ends Registry; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 5:
 
-Run /superpowers:brainstorming to design the memo, workfolder, catalog, and handoff approach; all proposals must be checked against Dead Ends Registry before inclusion; after brainstorming presents design approaches and the design doc is written, STOP — do not invoke writing-plans (Phase 6 uses ultraplan instead); then run /mattpocock:handoff; then stop for path selection and PROCEED.
+Run /superpowers:brainstorming to design the memo, workfolder, catalog, and handoff approach; all proposals must be checked against Dead Ends Registry before inclusion; after brainstorming presents design approaches and the design doc is written, STOP — do not invoke writing-plans (Phase 6 uses ultraplan instead); then stop for path selection, user approval, and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 6:
 
-Run /ultraplan on the selected path; then run /mattpocock:handoff; then stop for PROCEED.
+Run /ultraplan on the selected path; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 7:
 
-Run /superpowers:writing-plans to write the final execution plan with explicit validation checkpoints and rollback triggers; write plan to disk; then run /mattpocock:handoff; then stop for approval and PROCEED.
+Run /superpowers:writing-plans to write the final execution plan with explicit validation checkpoints and rollback triggers; write plan to disk; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 8a:
 

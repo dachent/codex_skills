@@ -86,6 +86,98 @@ class ManifestValidatorTest(unittest.TestCase):
             errors = validate_manifest(root, manifest)
             self.assertTrue(any("missing agent metadata" in item for item in errors))
 
+    def test_archived_skill_uses_registered_archive_path(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest_path = self.make_repo(root)
+            archived = root / "archive" / "retired-skill"
+            (archived / "agents").mkdir(parents=True)
+            (root / "archive" / "README.md").write_text("# Archive\n", encoding="utf-8")
+            (archived / "README.md").write_text("# Retired\n", encoding="utf-8")
+            (archived / "SKILL.md").write_text(
+                "---\nname: retired-skill\ndescription: Archived.\n---\n", encoding="utf-8"
+            )
+            (archived / "agents" / "openai.yaml").write_text(
+                "interface:\n  display_name: Retired\n  short_description: Archived skill\n"
+                "  default_prompt: Do not use.\n",
+                encoding="utf-8",
+            )
+            data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            data["skills"].append(
+                {
+                    "name": "retired-skill",
+                    "path": "archive/retired-skill",
+                    "family": "test",
+                    "catalog_group": "test",
+                    "status": "archived",
+                    "description": "Archived.",
+                    "platforms": ["linux"],
+                    "agents": ["codex"],
+                    "runtimes": {"type": "prompt"},
+                    "packaging": {
+                        "skill_file": "archive/retired-skill/SKILL.md",
+                        "agent_metadata": "archive/retired-skill/agents/openai.yaml",
+                    },
+                    "source": {"classification": "repo-owned-original"},
+                    "validation": {
+                        "hosted_commands": [],
+                        "environment_dependent_commands": [],
+                    },
+                    "owner": "@owner",
+                    "last_reviewed": "2026-07-27",
+                }
+            )
+            manifest_path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertEqual(validate_manifest(root, manifest_path), [])
+
+    def test_active_skill_cannot_use_nested_path(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest_path = self.make_repo(root)
+            data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            data["skills"][0]["path"] = "nested/sample-skill"
+            manifest_path.write_text(json.dumps(data), encoding="utf-8")
+            errors = validate_manifest(root, manifest_path)
+            self.assertTrue(any("active skill path must be one top-level directory" in item for item in errors))
+
+    def test_unregistered_archived_skill_fails(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest_path = self.make_repo(root)
+            archived = root / "archive" / "orphan"
+            archived.mkdir(parents=True)
+            (root / "archive" / "README.md").write_text("# Archive\n", encoding="utf-8")
+            (archived / "SKILL.md").write_text(
+                "---\nname: orphan\ndescription: Orphan.\n---\n", encoding="utf-8"
+            )
+            errors = validate_manifest(root, manifest_path)
+            self.assertTrue(any("unregistered archived skill directory" in item for item in errors))
+
+    def test_documented_scaffold_namespace_is_not_a_skill(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest_path = self.make_repo(root)
+            package = root / "scaffolds" / "sample-scaffold"
+            package.mkdir(parents=True)
+            (root / "scaffolds" / "README.md").write_text("# Scaffolds\n", encoding="utf-8")
+            (package / "README.md").write_text("# Sample\n", encoding="utf-8")
+            (package / "prompt.md").write_text("Example scaffold.\n", encoding="utf-8")
+            self.assertEqual(validate_manifest(root, manifest_path), [])
+
+    def test_scaffold_cannot_masquerade_as_installable_skill(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest_path = self.make_repo(root)
+            package = root / "scaffolds" / "sample-scaffold"
+            package.mkdir(parents=True)
+            (root / "scaffolds" / "README.md").write_text("# Scaffolds\n", encoding="utf-8")
+            (package / "README.md").write_text("# Sample\n", encoding="utf-8")
+            (package / "SKILL.md").write_text(
+                "---\nname: sample-scaffold\ndescription: Wrong.\n---\n", encoding="utf-8"
+            )
+            errors = validate_manifest(root, manifest_path)
+            self.assertTrue(any("scaffold packages must not contain SKILL.md" in item for item in errors))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

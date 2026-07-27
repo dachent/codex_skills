@@ -9,6 +9,7 @@ Do not use this document as a substitute for repository license files or legal r
 ## Original scaffold
 
 - Source: `https://gist.github.com/dachent/cdc05151d047708c290bd4da0aaeed96`
+- Maintained repository location: `scaffolds/agent-project-scaffold/`
 - File: `claude_code_deep_planning.txt`
 - Displayed raw revision during preparation: `6ea4c02e5aa60c9991e1e4d1c50089c01cd6ec83`
 - Existing repository provenance snapshot revision: `0aadb9e28397b07a75853d40a78610bc21cebc81`

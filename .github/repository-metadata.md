@@ -4,21 +4,23 @@ This file is the canonical source for GitHub repository settings that are not st
 
 ## Description
 
-`Windows-native Codex skills for Word, PowerPoint, and Excel using Microsoft Office COM automation.`
+`Curated agent skills, non-installable project scaffolds, shared runtimes, and validation tooling for Codex and Claude Code.`
 
 ## Topics
 
 - `codex`
+- `claude-code`
+- `ai-agents`
+- `agent-skills`
 - `skills`
+- `scaffolds`
+- `prompt-engineering`
+- `developer-tools`
 - `windows`
 - `powershell`
 - `python`
 - `microsoft-office`
 - `office-automation`
-- `word`
-- `powerpoint`
-- `excel`
-- `com-automation`
 
 ## Homepage
 

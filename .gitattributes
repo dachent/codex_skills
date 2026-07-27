@@ -1,0 +1,4 @@
+# Preserve the published scaffold package's verified Gist byte hashes on every platform.
+scaffolds/agent-project-scaffold/claude_code_deep_planning.md text eol=lf
+scaffolds/agent-project-scaffold/scaffold_evaluationplan.md text eol=lf
+scaffolds/agent-project-scaffold/validation_results_codex.md text eol=lf

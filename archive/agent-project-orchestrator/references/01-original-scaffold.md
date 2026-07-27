@@ -4,6 +4,8 @@
 
 This package preserves the original scaffold as historical source material before describing later generalization or architectural changes.
 
+The maintained scaffold and its complete, hash-verified Gist history now live at [`../../../scaffolds/agent-project-scaffold`](../../../scaffolds/agent-project-scaffold). The raw transcription below remains only as the input used by this archived package.
+
 The raw transcription is stored at:
 
 - [`original/claude_code_deep_planning.txt`](original/claude_code_deep_planning.txt)

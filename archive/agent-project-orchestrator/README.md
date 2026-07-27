@@ -1,6 +1,6 @@
-# Agent Project Orchestrator
+# Agent Project Orchestrator (Archived)
 
-> **Deprecated — do not install or invoke.** It adds no demonstrated value over the original Claude Code predecessor for Claude Code, and no value over native planning and execution controls for Codex GPT-5.6 Sol. The predecessor is [gist `cdc05151d047708c290bd4da0aaeed96`](https://gist.github.com/dachent/cdc05151d047708c290bd4da0aaeed96).
+> **Archived — do not install or invoke.** It adds no demonstrated value over the maintained [`agent-project-scaffold`](../../scaffolds/agent-project-scaffold) for Claude Code, and no value over native planning and execution controls for Codex GPT-5.6 Sol. The original Gist remains a provenance source, not the maintained hosting location.
 
 The remaining content is retained as historical, non-operational design documentation.
 
@@ -18,7 +18,7 @@ The remaining content is retained as historical, non-operational design document
 > [#63](https://github.com/dachent/skills/pull/63). Re-evaluate only against a design grounded in real
 > captured scaffold output, not an assumed grammar.
 
-`agent-project-orchestrator` is a deprecated architecture and control-plane package retained only for historical reference.
+`agent-project-orchestrator` is an archived architecture and control-plane package retained only for historical reference.
 
 It generalizes a proven Claude Code deep-planning scaffold into a project operating model with:
 

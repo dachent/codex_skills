@@ -102,11 +102,11 @@
     },
     {
       "name": "agent-project-orchestrator",
-      "path": "agent-project-orchestrator",
+      "path": "archive/agent-project-orchestrator",
       "family": "project-orchestration",
       "catalog_group": "repository-owned",
-      "status": "deprecated",
-      "description": "Deprecated for Claude Code and Codex GPT-5.6 Sol: use predecessor gist cdc05151d047708c290bd4da0aaeed96 for the original Claude workflow or native Codex planning and execution controls.",
+      "status": "archived",
+      "description": "Archived and non-installable: evaluation found no demonstrated value over the project scaffold for Claude Code or native planning and execution controls for Codex GPT-5.6 Sol.",
       "platforms": [
         "cross-platform"
       ],
@@ -118,23 +118,20 @@
         "type": "prompt"
       },
       "packaging": {
-        "skill_file": "agent-project-orchestrator/SKILL.md",
-        "agent_metadata": "agent-project-orchestrator/agents/openai.yaml",
-        "provenance_file": "agent-project-orchestrator/PROVENANCE.md"
+        "skill_file": "archive/agent-project-orchestrator/SKILL.md",
+        "agent_metadata": "archive/agent-project-orchestrator/agents/openai.yaml",
+        "provenance_file": "archive/agent-project-orchestrator/PROVENANCE.md"
       },
       "source": {
         "classification": "repo-owned-original"
       },
       "validation": {
-        "ci_enabled": true,
-        "hosted_commands": [
-          "python .\\agent-project-orchestrator\\scripts\\test_doctor.py",
-          "python .\\agent-project-orchestrator\\scripts\\doctor.py --root .\\agent-project-orchestrator"
-        ],
+        "ci_enabled": false,
+        "hosted_commands": [],
         "environment_dependent_commands": []
       },
       "owner": "@dachent",
-      "last_reviewed": "2026-07-19"
+      "last_reviewed": "2026-07-27"
     },
     {
       "name": "canvas-design-codex",
@@ -300,7 +297,7 @@
       },
       "validation": {
         "hosted_commands": [
-          "node --test document-handoff/scripts/tests/*.test.mjs"
+          "node --test --test-concurrency=1 document-handoff/scripts/tests/*.test.mjs"
         ],
         "environment_dependent_commands": []
       },

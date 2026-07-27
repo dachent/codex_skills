@@ -34,7 +34,7 @@ def installation(m):
  comps={s['name']:[] for s in active(m)}
  for c in m.get('shared_components',[]):
   for n in c.get('consumers',[]): comps.setdefault(n,[]).append(c['path'])
- out=[notice('installation inventory'),'','Top-level skill directories are canonical. Copy only the skills required by the target agent, plus listed shared components.','','| Skill | Canonical directory | Shared components |','| --- | --- | --- |']
+ out=[notice('installation inventory'),'','Only the entries below are installable. Their top-level skill directories are canonical; `scaffolds/` and `archive/` are excluded. Copy only the skills required by the target agent, plus listed shared components.','','| Skill | Canonical directory | Shared components |','| --- | --- | --- |']
  for s in sorted(active(m),key=lambda x:x['name']): out.append(f"| `{s['name']}` | [`{s['path']}`](./{s['path']}) | {fmt(comps.get(s['name'],[]))} |")
  return '\n'.join(out)
 def matrix(m):

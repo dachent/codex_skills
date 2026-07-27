@@ -297,7 +297,7 @@
       },
       "validation": {
         "hosted_commands": [
-          "node --test document-handoff/scripts/tests/*.test.mjs"
+          "node --test --test-concurrency=1 document-handoff/scripts/tests/*.test.mjs"
         ],
         "environment_dependent_commands": []
       },

@@ -175,6 +175,16 @@ class SkillRunnerTests(unittest.TestCase):
 
 
 class RepositoryManifestIntegrationTests(unittest.TestCase):
+    def test_document_handoff_node_tests_are_serialized(self) -> None:
+        manifest = ci_matrix.load_manifest()
+        skill = next(
+            item for item in manifest["skills"] if item["name"] == "document-handoff"
+        )
+        self.assertEqual(
+            skill["validation"]["hosted_commands"],
+            ["node --test --test-concurrency=1 document-handoff/scripts/tests/*.test.mjs"],
+        )
+
     def test_full_matrix_covers_every_ci_enabled_skill(self) -> None:
         manifest = ci_matrix.load_manifest()
         expected = sorted(

@@ -7,6 +7,7 @@ Repository-owned original architecture package with attributed source material a
 ## Ownership and primary lineage
 
 - Original scaffold: `dachent/cdc05151d047708c290bd4da0aaeed96`, file `claude_code_deep_planning.txt`, displayed gist revision `6ea4c02e5aa60c9991e1e4d1c50089c01cd6ec83`. The gist and this repository have the same owner.
+- Maintained scaffold location: `scaffolds/agent-project-scaffold/`. Its stable file history replays all seven Gist revisions with verified source hashes.
 - Existing Codex planning ports: `deep-planning-codex`, `repo-map-codex`, `verification-plan-codex`, and `adversarial-plan-review-codex` in this repository.
 - UltraPlan: `6missedcalls/ultraplan`, MIT.
 - Matt Pocock skills: `mattpocock/skills`, MIT.

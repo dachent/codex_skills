@@ -56,6 +56,40 @@ def discover_skill_paths(repo_root: Path) -> set[str]:
     return found
 
 
+def discover_archived_skill_paths(repo_root: Path) -> set[str]:
+    archive_root = repo_root / "archive"
+    if not archive_root.is_dir():
+        return set()
+    return {
+        child.relative_to(repo_root).as_posix()
+        for child in archive_root.iterdir()
+        if child.is_dir() and (child / "SKILL.md").is_file()
+    }
+
+
+def validate_non_skill_namespaces(repo_root: Path, errors: list[str]) -> None:
+    scaffolds_root = repo_root / "scaffolds"
+    if scaffolds_root.is_dir():
+        if not (scaffolds_root / "README.md").is_file():
+            fail(errors, "scaffolds: missing namespace README.md")
+        for package in scaffolds_root.iterdir():
+            if not package.is_dir():
+                continue
+            if not (package / "README.md").is_file():
+                fail(errors, f"{package.relative_to(repo_root).as_posix()}: missing README.md")
+            if any(package.rglob("SKILL.md")):
+                fail(errors, f"{package.relative_to(repo_root).as_posix()}: scaffold packages must not contain SKILL.md")
+            if any(path.parent.name == "agents" for path in package.rglob("openai.yaml")):
+                fail(
+                    errors,
+                    f"{package.relative_to(repo_root).as_posix()}: scaffold packages must not contain agents/openai.yaml",
+                )
+
+    archive_root = repo_root / "archive"
+    if archive_root.is_dir() and not (archive_root / "README.md").is_file():
+        fail(errors, "archive: missing namespace README.md")
+
+
 def validate_date(value: Any, context: str, errors: list[str]) -> None:
     if not isinstance(value, str):
         fail(errors, f"{context}: last_reviewed must be YYYY-MM-DD")
@@ -153,6 +187,7 @@ def validate_manifest(repo_root: Path, manifest_path: Path) -> list[str]:
     names: set[str] = set()
     paths: set[str] = set()
     declared_existing_paths: set[str] = set()
+    declared_archived_paths: set[str] = set()
     for index, raw in enumerate(skills):
         context = f"skills[{index}]"
         if not isinstance(raw, dict):
@@ -166,12 +201,27 @@ def validate_manifest(repo_root: Path, manifest_path: Path) -> list[str]:
         if path_value in paths:
             fail(errors, f"duplicate skill path: {path_value}")
         paths.add(path_value)
-        if path_value and ("/" in path_value or "\\" in path_value or path_value.startswith(".")):
-            fail(errors, f"{name}: skill path must be one top-level directory")
 
         status = require_string(raw, "status", name or context, errors)
         if status and status not in valid_statuses:
             fail(errors, f"{name}: unsupported status {status!r}")
+        normalized_path = path_value.replace("\\", "/")
+        path_parts = normalized_path.split("/") if normalized_path else []
+        if status == "archived":
+            if (
+                path_value != normalized_path
+                or len(path_parts) != 2
+                or path_parts[0] != "archive"
+                or path_parts[1] != name
+                or any(part in {"", ".", ".."} for part in path_parts)
+            ):
+                fail(errors, f"{name}: archived skill path must be archive/<skill-name>")
+        elif path_value and (
+            path_value != normalized_path
+            or len(path_parts) != 1
+            or path_value.startswith(".")
+        ):
+            fail(errors, f"{name}: active skill path must be one top-level directory")
         require_string(raw, "family", name or context, errors)
         catalog_group = require_string(raw, "catalog_group", name or context, errors)
         if catalog_group and catalog_group not in catalog_group_keys:
@@ -232,12 +282,22 @@ def validate_manifest(repo_root: Path, manifest_path: Path) -> list[str]:
                     fail(errors, f"{name}: validation.{key} must be a list of strings")
         if path_value and status != "archived":
             declared_existing_paths.add(path_value)
+        elif path_value:
+            declared_archived_paths.add(normalized_path)
 
     discovered = discover_skill_paths(repo_root)
     for item in sorted(discovered - declared_existing_paths):
         fail(errors, f"unregistered top-level skill directory: {item}")
     for item in sorted(declared_existing_paths - discovered):
         fail(errors, f"manifest skill directory is missing or lacks SKILL.md: {item}")
+
+    archived = discover_archived_skill_paths(repo_root)
+    for item in sorted(archived - declared_archived_paths):
+        fail(errors, f"unregistered archived skill directory: {item}")
+    for item in sorted(declared_archived_paths - archived):
+        fail(errors, f"manifest archived skill directory is missing or lacks SKILL.md: {item}")
+
+    validate_non_skill_namespaces(repo_root, errors)
 
 
     mirrors = manifest.get("generated_mirrors", [])

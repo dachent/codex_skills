@@ -1,19 +1,20 @@
-# LLM agent skills
+# Agent skills, scaffolds, and repository tooling
 
 [![Validate](https://github.com/dachent/skills/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/dachent/skills/actions/workflows/validate.yml)
 
-A curated skill repository built for four distinct purposes:
+A curated agent-operations repository built for five distinct purposes:
 
 1. **Native application skill extensions** — forks and adaptations that replace generic file transformation with native Microsoft Office automation, including `docx-win`, `pptx-win`, and `xlsx-win`.
 2. **Claude and agent workflow ports for Codex** — established workflows such as Grill Me, Handoff, Deep Planning, and Ultraplan adapted to Codex conventions, tools, permissions, and durable artifact contracts.
 3. **Repository-owned specialist skills** — original or locally imported implementations, including Code Mapper and Document Handoff, whose current behavior is maintained here.
 4. **A Codex design extension pack** — coordinated visual skills that extend Codex design work with shared browser rendering, screenshot evidence, accessibility review, and artifact QA.
+5. **Non-installable project scaffolds and historical packages** — reusable instruction documents under `scaffolds/` and retired implementations under `archive/`, kept explicitly separate from the installable skill inventory.
 
-This provenance-and-purpose grouping explains **why a skill belongs here**. Platform, runtime, agent support, and validation remain separate attributes generated from [`skills-manifest.json`](./skills-manifest.json).
+This provenance-and-purpose grouping explains **why content belongs here**. Platform, runtime, agent support, and validation remain separate attributes for installable skills and are generated from [`skills-manifest.json`](./skills-manifest.json).
 
 ## Repository model
 
-`skills-manifest.json` is the operational source of truth for inventory, catalog grouping, ownership, support, provenance classification, packaging, shared runtimes, validation, and any generated agent mirrors. Each top-level skill directory is canonical. See [`docs/repository-contract.md`](./docs/repository-contract.md).
+`skills-manifest.json` is the operational source of truth for active and archived skill packages, catalog grouping, ownership, support, provenance classification, packaging, shared runtimes, validation, and generated agent mirrors. Each active skill has one canonical top-level directory. [`scaffolds/`](./scaffolds) contains documented non-skills; [`archive/`](./archive) contains non-installable historical packages. See [`docs/repository-contract.md`](./docs/repository-contract.md).
 
 ## Skill catalog
 
@@ -51,7 +52,6 @@ Original or locally imported workflows whose current implementation is maintaine
 
 | Skill | Purpose | Provenance |
 | --- | --- | --- |
-| [`agent-project-orchestrator`](./agent-project-orchestrator) | Deprecated for Claude Code and Codex GPT-5.6 Sol: use predecessor gist cdc05151d047708c290bd4da0aaeed96 for the original Claude workflow or native Codex planning and execution controls. | repo owned original |
 | [`code-intelligence`](./code-intelligence) | Claude Code-only explicit provider router for assessing installed Graphify, code-mapper, or selective CodeQL routes. Not for Codex GPT-5.6 Sol, whose native inspection, Plan Mode, explorer work, and subagents cover this function without an added analyzer. | repo owned original |
 | [`code-mapper-skill`](./code-mapper-skill) | Generate deterministic Python import, reference, artifact, contract, catalog, OpenLineage, and explicitly authorized local CodeQL maps. Use for explicit blast-radius, caller, contract, lineage, or local value/taint evidence requests against an approved local worktree. | repo owned original |
 | [`document-handoff`](./document-handoff) | Create a comprehensive cross-harness project archive and handoff package with content-addressed Codex, Claude Code, Kimi Code, Hermes, or declared session evidence. Use for milestone archives and cold-start continuation; distinct from a lightweight session handoff. | local source import |
@@ -72,12 +72,11 @@ A coordinated set of visual design skills built around shared browser rendering,
 <!-- BEGIN GENERATED: installation-inventory -->
 <!-- Generated section: installation inventory. Source: skills-manifest.json. Generator: tools/generate_repository_artifacts.py. Do not edit by hand. -->
 
-Top-level skill directories are canonical. Copy only the skills required by the target agent, plus listed shared components.
+Only the entries below are installable. Their top-level skill directories are canonical; `scaffolds/` and `archive/` are excluded. Copy only the skills required by the target agent, plus listed shared components.
 
 | Skill | Canonical directory | Shared components |
 | --- | --- | --- |
 | `adversarial-plan-review-codex` | [`adversarial-plan-review-codex`](./adversarial-plan-review-codex) | — |
-| `agent-project-orchestrator` | [`agent-project-orchestrator`](./agent-project-orchestrator) | — |
 | `canvas-design-codex` | [`canvas-design-codex`](./canvas-design-codex) | `.shared/visual-runtime` |
 | `code-intelligence` | [`code-intelligence`](./code-intelligence) | — |
 | `code-mapper-skill` | [`code-mapper-skill`](./code-mapper-skill) | — |
@@ -104,7 +103,6 @@ Top-level skill directories are canonical. Copy only the skills required by the 
 | Skill | Platforms | Agents | Status |
 | --- | --- | --- | --- |
 | [`adversarial-plan-review-codex`](./adversarial-plan-review-codex) | `cross-platform` | `codex` | `supported` |
-| [`agent-project-orchestrator`](./agent-project-orchestrator) | `cross-platform` | `codex`, `claude-code` | `deprecated` |
 | [`canvas-design-codex`](./canvas-design-codex) | `cross-platform` | `codex` | `supported` |
 | [`code-intelligence`](./code-intelligence) | `cross-platform` | `claude-code` | `supported` |
 | [`code-mapper-skill`](./code-mapper-skill) | `cross-platform` | `codex`, `claude-code` | `supported` |
@@ -139,14 +137,15 @@ Office skills require Windows, an interactive signed-in desktop session, and the
 ### Codex
 
 1. Clone the repository.
-2. Copy the desired canonical top-level skill directories into the Codex skills directory, commonly `%USERPROFILE%\.codex\skills\`.
-3. Copy shared components shown in the generated installation inventory.
-4. Keep directory names unchanged.
-5. Run the relevant validation before relying on the skill on a new machine.
+2. Select only skills listed in the generated installation inventory; never install from `scaffolds/` or `archive/`.
+3. Copy the selected canonical top-level skill directories into the Codex skills directory, commonly `%USERPROFILE%\.codex\skills\`.
+4. Copy shared components shown in the generated installation inventory.
+5. Keep directory names unchanged.
+6. Run the relevant validation before relying on the skill on a new machine.
 
 ### Claude Code
 
-Load compatible canonical top-level skill directories directly. `.claude/skills` is reserved for generated, manifest-declared mirrors only; it is not a second source tree.
+Load compatible canonical top-level skill directories from the generated installation inventory directly. Do not install `scaffolds/` or `archive/`. `.claude/skills` is reserved for generated, manifest-declared mirrors only; it is not a second source tree.
 
 ## Validation summary
 
@@ -156,7 +155,6 @@ Load compatible canonical top-level skill directories directly. `.claude/skills`
 | Skill | Hosted commands | Environment-dependent commands |
 | --- | ---: | ---: |
 | `adversarial-plan-review-codex` | 1 | 0 |
-| `agent-project-orchestrator` | 2 | 0 |
 | `canvas-design-codex` | 1 | 0 |
 | `code-intelligence` | 1 | 0 |
 | `code-mapper-skill` | 1 | 0 |
@@ -208,7 +206,9 @@ The shared visual runtime uses a **render-inspect-lint-revise** loop and is chec
 - [`.shared/office-com/`](./.shared/office-com): Office preflight and COM boundary runtime;
 - [`.shared/visual-runtime/`](./.shared/visual-runtime): browser screenshot, lint, PDF, and image-evidence tooling;
 - [`.codex/agents`](./.codex/agents): specialized review and packaging agents;
-- each top-level skill directory: the canonical skill definition and implementation;
+- [`scaffolds/`](./scaffolds): reusable instruction scaffolds that are explicitly not skills;
+- [`archive/`](./archive): non-installable historical skill packages;
+- each remaining manifest-declared top-level skill directory: an active canonical skill definition and implementation;
 - [`.github/workflows/`](./.github/workflows): hosted validation, drift checks, and Office smoke workflows;
 - [`tools/`](./tools): generators, validators, and contract tests.
 
@@ -220,4 +220,4 @@ The repository does not currently publish a root `LICENSE`. Do not assume redist
 
 ## Contributing
 
-Update `skills-manifest.json` whenever inventory, grouping, support, source, runtime, packaging, or validation changes. Then run the generator and check mode. CI fails when a top-level skill is unregistered, generated README sections are stale, a declared mirror diverges, or undeclared files appear under `.claude/skills`.
+Update `skills-manifest.json` whenever skill inventory, grouping, support, source, runtime, packaging, or validation changes. Document scaffolds under `scaffolds/` without skill metadata; move retired packages under `archive/` and mark them `archived` in the manifest. Then run the generator and check mode. CI fails when an active or archived skill is unregistered, a scaffold masquerades as a skill, generated README sections are stale, a declared mirror diverges, or undeclared files appear under `.claude/skills`.

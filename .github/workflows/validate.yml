@@ -101,6 +101,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           python ./tools/validate_skill_manifest.py
           python ./tools/test_skill_manifest.py
+          python ./tools/test_scaffold_archive_contract.py
           python ./tools/generate_repository_artifacts.py --check
           python ./tools/test_generate_repository_artifacts.py
       - name: Validate CI orchestration

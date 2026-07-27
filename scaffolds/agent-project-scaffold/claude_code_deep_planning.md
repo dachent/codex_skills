@@ -2,7 +2,7 @@
 
 Phase 0:
 
-Run /mattpocock:grill-with-docs to validate, expand, and sharpen the draft success criteria, failure criteria, and out-of-scope boundaries — user brings draft, do not establish from scratch; select model (Phases 1–3 read-heavy → Sonnet; Phase 8b execution → Sonnet or Opus depending on COM complexity); estimate complexity and context window requirements; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
+Run /mattpocock:grill-with-docs to validate, expand, and sharpen the draft success criteria, failure criteria, and out-of-scope boundaries — user brings draft, do not establish from scratch; select model (Phases 1–3 read-heavy → Sonnet; Phase 8b execution → Sonnet or Opus depending on COM complexity); estimate complexity and context window requirements; check a durable cross-project lessons-learned/dead-ends store if one exists yet, and fold any relevant entries into the draft criteria before grilling; then stop for user approval and explicit PROCEED; after PROCEED, run /mattpocock:handoff before continuing.
 
 Phase 1:
 
@@ -46,4 +46,4 @@ Execute approved plan using /superpowers:subagent-driven-development or /superpo
 
 Phase 8c:
 
-Run /superpowers:verification-before-completion to validate outputs against Phase 0 success criteria; produce final handoff package including deliverables, state document, updated Dead Ends Registry, and lessons learned delta; then run /mattpocock:handoff as final archival record.
+Run /superpowers:verification-before-completion to validate outputs against Phase 0 success criteria; produce final handoff package including deliverables, state document, updated Dead Ends Registry, and lessons learned delta; append the lessons learned delta to a durable cross-project store (create one if none exists yet) so future projects can consult it in their own Phase 0; then run /mattpocock:handoff as final archival record.

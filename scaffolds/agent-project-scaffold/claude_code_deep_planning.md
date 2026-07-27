@@ -2,7 +2,7 @@
 
 Phase 0:
 
-Define success criteria, failure criteria, and out-of-scope boundaries; select model; estimate complexity and context window requirements; then run /mattpocock:handoff to write Phase 0 state to disk; then stop for PROCEED.
+Run /mattpocock:grill-with-docs to validate, expand, and sharpen the draft success criteria, failure criteria, and out-of-scope boundaries — user brings draft, do not establish from scratch; select model (Phases 1–3 read-heavy → Sonnet; Phase 8b execution → Sonnet or Opus depending on COM complexity); estimate complexity and context window requirements; then run /mattpocock:handoff; then stop for PROCEED.
 
 Phase 1:
 
@@ -26,11 +26,11 @@ Run targeted low-cost high-impact probes to validate the critical assumptions su
 
 Phase 5:
 
-Run /superpowers:brainstorming to design the memo, workfolder, catalog, and handoff approach; all proposals must be checked against Dead Ends Registry before inclusion; then run /mattpocock:handoff; then stop for path selection and PROCEED.
+Run /superpowers:brainstorming to design the memo, workfolder, catalog, and handoff approach; all proposals must be checked against Dead Ends Registry before inclusion; after brainstorming presents design approaches and the design doc is written, STOP — do not invoke writing-plans (Phase 6 uses ultraplan instead); then run /mattpocock:handoff; then stop for path selection and PROCEED.
 
 Phase 6:
 
-Run /superpowers:ultraplan on the selected path; then run /mattpocock:handoff; then stop for PROCEED.
+Run /ultraplan on the selected path; then run /mattpocock:handoff; then stop for PROCEED.
 
 Phase 7:
 

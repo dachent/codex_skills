@@ -146,11 +146,12 @@ def _validate_composite_semantics(instance: dict) -> None:
         expected_final_rows = existing_rows + source_rows
     else:
         expected_final_rows = source_rows
-        if table.get("saved_sort") is not None:
-            _raise_semantic(
-                "The initial replacement profile does not support a saved sort descriptor.",
-                {"operation": operation["type"], "saved_sort": table["saved_sort"]},
-            )
+        # saved_sort is governed by the capability profile
+        # (excel64_table_pivot_replace_v1: required_descriptor) — the
+        # descriptor must match the workbook's actual sortState, which the
+        # OOXML preflight verifies. No hardcoded rejection here (the
+        # "absent" profile era's contradiction: preflight required what
+        # this check rejected, making every manifest unsatisfiable).
     if final_rows != expected_final_rows:
         _raise_semantic(
             "Composite row arithmetic is invalid.",

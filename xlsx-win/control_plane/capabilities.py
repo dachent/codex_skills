@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import ntpath
 from pathlib import Path
 
@@ -16,6 +17,22 @@ from .schemas import COMPOSITE_SCHEMA_VERSION, SCHEMA_DIR, validate_job
 CAPABILITY_DIR = Path(__file__).resolve().parent.parent / "capabilities"
 CAPABILITY_SCHEMA = json.loads((SCHEMA_DIR / "capability-profile.schema.json").read_text(encoding="utf-8"))
 _CAPABILITY_VALIDATOR = validator_for(CAPABILITY_SCHEMA)(CAPABILITY_SCHEMA)
+
+LOGGER = logging.getLogger(__name__)
+
+
+def _build_tuple(value: object) -> tuple[int, ...] | None:
+    """Parse a dotted build string like ``16.0.20330.20000`` into an integer tuple.
+
+    Returns ``None`` when the value is not a dotted-integer string, so callers
+    fail closed instead of comparing garbage.
+    """
+    if not isinstance(value, str) or not value:
+        return None
+    parts = value.split(".")
+    if not all(part.isdigit() for part in parts):
+        return None
+    return tuple(int(part) for part in parts)
 
 
 def _canonical_bytes(profile: dict) -> bytes:
@@ -90,6 +107,35 @@ def _within(name: str, actual: int, bounds: dict, failures: list[dict]) -> None:
         failures.append({"limit": name, "actual": actual, "allowed": bounds})
 
 
+def _check_excel_build(profile: dict, env: dict, actual: object, failures: list[dict]) -> None:
+    """Admit ``excel_build`` against the profile's floor, or exact membership.
+
+    With ``min_excel_build`` declared, the floor is the gate and
+    ``excel_builds`` is the certified set: a build at or above the floor but
+    outside the certified set proceeds with a WARN so drift is visible in the
+    run evidence. Without a floor, exact membership remains the gate
+    (backward compatible).
+    """
+    min_build = env.get("min_excel_build")
+    if min_build is None:
+        if actual not in env["excel_builds"]:
+            failures.append({"check": "excel_build", "actual": actual, "allowed": env["excel_builds"]})
+        return
+    actual_tuple = _build_tuple(actual)
+    if actual_tuple is None or actual_tuple < _build_tuple(min_build):
+        failures.append(
+            {"check": "excel_build", "actual": actual, "allowed": {"min_excel_build": min_build}}
+        )
+        return
+    if actual not in env["excel_builds"]:
+        LOGGER.warning(
+            "uncertified Excel build %s (profile %s certifies %s); composite proof is the gate",
+            actual,
+            profile["id"],
+            env["excel_builds"],
+        )
+
+
 def admit_manifest(
     manifest: dict,
     *,
@@ -102,6 +148,13 @@ def admit_manifest(
     ``office_bitness``, ``dotnet_runtime``, ``locale``, and ``date_system``.
     Omitting environment is useful for offline contract validation; a runtime
     must supply it before opening Excel.
+
+    ``excel_build`` admission: when the profile declares
+    ``environment.min_excel_build``, the installed build must compare greater
+    than or equal to that floor (dotted integer tuples); ``excel_builds`` then
+    names the *certified* set (evidence, not the gate) and an installed build
+    above the floor but outside that set proceeds with a WARN log line. When
+    no floor is declared, membership in ``excel_builds`` remains the gate.
     """
     validate_job(manifest)
     if manifest.get("schema_version") != COMPOSITE_SCHEMA_VERSION:
@@ -156,7 +209,6 @@ def admit_manifest(
         env = profile["environment"]
         membership = {
             "windows_build": "windows_builds",
-            "excel_build": "excel_builds",
             "locale": "locales",
             "date_system": "date_systems",
         }
@@ -165,6 +217,7 @@ def admit_manifest(
                 failures.append(
                     {"check": actual_name, "actual": environment.get(actual_name), "allowed": env[allowed_name]}
                 )
+        _check_excel_build(profile, env, environment.get("excel_build"), failures)
         for exact in ("office_bitness", "dotnet_runtime"):
             if environment.get(exact) != env[exact]:
                 failures.append({"check": exact, "actual": environment.get(exact), "allowed": env[exact]})

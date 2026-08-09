@@ -273,6 +273,25 @@ wants the same guardrails around `run` can layer
 `excel_safety.preflight_or_raise()` / `excel_safety.assert_no_excel_survives()`
 around it exactly as `run_corpus.py` does.
 
+## Capability profiles and the Excel build gate
+
+`control_plane/capabilities.py` admits a composite (schema 2.1) job only if it
+fits an immutable profile from `capabilities/`. The environment checks are
+exact membership everywhere -- `windows_builds`, `office_bitness`,
+`dotnet_runtime`, `locales`, `date_systems` -- **except** `excel_build`, where
+a profile may declare `environment.min_excel_build`. With a floor present, the
+installed Excel build only has to compare greater than or equal to it
+(dotted-integer tuple comparison, e.g. `(16,0,20330,20000) >=
+(16,0,20313,20000)`); `excel_builds` then names the *certified* set, kept as
+evidence, and a build at/above the floor but outside that set proceeds with a
+WARN log line ("uncertified Excel build X; composite proof is the gate") so
+M365 auto-update drift is visible in the run logs instead of bricking
+production. Below the floor, admission fails closed with
+`CAPABILITY_PROFILE_INVALID`, exactly as before. Profiles without
+`min_excel_build` keep the old exact-membership gate unchanged. The runtime's
+real guarantee is the mandatory per-run composite proof (hash-bound
+invariants, fail-closed), which verifies output regardless of build.
+
 ## Running the tests
 
 ```

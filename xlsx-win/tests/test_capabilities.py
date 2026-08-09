@@ -102,6 +102,62 @@ def test_environment_mismatch_rejects_before_excel() -> None:
     assert excinfo.value.code == "CAPABILITY_PROFILE_INVALID"
 
 
+def _append_environment(excel_build: str) -> dict:
+    return {
+        "windows_build": "10.0.26200",
+        "excel_build": excel_build,
+        "office_bitness": "x64",
+        "dotnet_runtime": "10.0.10",
+        "locale": "en-US",
+        "date_system": "1900",
+    }
+
+
+def test_min_excel_build_floor_admits_equal_and_above() -> None:
+    # Floor (16.0.20313.20000) and every certified build pass without warning.
+    for build in ("16.0.20313.20000", "16.0.20326.20000", "16.0.20330.20000"):
+        admitted = admit_manifest(_production_append(), environment=_append_environment(build))
+        assert admitted["profile"]["id"] == "excel64_table_pivot_append_saved_sort_v1"
+
+
+def test_min_excel_build_floor_rejects_below() -> None:
+    with pytest.raises(ContractError) as excinfo:
+        admit_manifest(_production_append(), environment=_append_environment("16.0.20312.20000"))
+    assert excinfo.value.code == "CAPABILITY_PROFILE_INVALID"
+    assert any(failure["check"] == "excel_build" for failure in excinfo.value.details["failures"])
+
+
+def test_uncertified_build_above_floor_warns_and_proceeds(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING", logger="control_plane.capabilities"):
+        admitted = admit_manifest(_production_append(), environment=_append_environment("16.0.20331.20000"))
+    assert admitted["profile"]["id"] == "excel64_table_pivot_append_saved_sort_v1"
+    warnings = [record for record in caplog.records if record.levelname == "WARNING"]
+    assert any("uncertified Excel build 16.0.20331.20000" in record.getMessage() for record in warnings)
+
+
+def test_certified_build_does_not_warn(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING", logger="control_plane.capabilities"):
+        admit_manifest(_production_append(), environment=_append_environment("16.0.20330.20000"))
+    assert not [record for record in caplog.records if record.levelname == "WARNING"]
+
+
+def test_legacy_profile_without_floor_keeps_exact_match(monkeypatch: pytest.MonkeyPatch) -> None:
+    profile = copy.deepcopy(load_profiles()["excel64_table_pivot_append_saved_sort_v1"])
+    del profile["environment"]["min_excel_build"]
+    monkeypatch.setattr(
+        "control_plane.capabilities.load_profiles",
+        lambda: {profile["id"]: profile},
+    )
+    # Certified build still passes.
+    admit_manifest(_production_append(), environment=_append_environment("16.0.20313.20000"))
+    # Anything outside excel_builds -- even a newer build -- is rejected,
+    # exactly as before.
+    with pytest.raises(ContractError) as excinfo:
+        admit_manifest(_production_append(), environment=_append_environment("16.0.20331.20000"))
+    assert excinfo.value.code == "CAPABILITY_PROFILE_INVALID"
+    assert any(failure["check"] == "excel_build" for failure in excinfo.value.details["failures"])
+
+
 def test_beta_label_is_impossible_without_complete_evidence() -> None:
     profile = copy.deepcopy(next(iter(load_profiles().values())))
     profile["status"] = "beta"

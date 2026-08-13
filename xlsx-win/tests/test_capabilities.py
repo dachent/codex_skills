@@ -158,6 +158,59 @@ def test_legacy_profile_without_floor_keeps_exact_match(monkeypatch: pytest.Monk
     assert any(failure["check"] == "excel_build" for failure in excinfo.value.details["failures"])
 
 
+def _append_environment_dotnet(dotnet_runtime: str) -> dict:
+    env = _append_environment("16.0.20330.20000")
+    env["dotnet_runtime"] = dotnet_runtime
+    return env
+
+
+def test_min_dotnet_runtime_floor_admits_equal_and_above() -> None:
+    # Floor (10.0.10) and the certified runtime pass without warning; a
+    # servicing update above the floor (the 2026-08-12 10.0.10 -> 10.0.11
+    # auto-update that blocked all production trend #7 jobs) also passes.
+    for runtime in ("10.0.10", "10.0.11", "10.1.0"):
+        admitted = admit_manifest(_production_append(), environment=_append_environment_dotnet(runtime))
+        assert admitted["profile"]["id"] == "excel64_table_pivot_append_saved_sort_v1"
+
+
+def test_min_dotnet_runtime_floor_rejects_below() -> None:
+    with pytest.raises(ContractError) as excinfo:
+        admit_manifest(_production_append(), environment=_append_environment_dotnet("10.0.9"))
+    assert excinfo.value.code == "CAPABILITY_PROFILE_INVALID"
+    assert any(failure["check"] == "dotnet_runtime" for failure in excinfo.value.details["failures"])
+
+
+def test_uncertified_dotnet_above_floor_warns_and_proceeds(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING", logger="control_plane.capabilities"):
+        admitted = admit_manifest(_production_append(), environment=_append_environment_dotnet("10.0.11"))
+    assert admitted["profile"]["id"] == "excel64_table_pivot_append_saved_sort_v1"
+    warnings = [record for record in caplog.records if record.levelname == "WARNING"]
+    assert any("uncertified .NET runtime 10.0.11" in record.getMessage() for record in warnings)
+
+
+def test_certified_dotnet_does_not_warn(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING", logger="control_plane.capabilities"):
+        admit_manifest(_production_append(), environment=_append_environment_dotnet("10.0.10"))
+    assert not [record for record in caplog.records if record.levelname == "WARNING"]
+
+
+def test_legacy_profile_without_dotnet_floor_keeps_exact_match(monkeypatch: pytest.MonkeyPatch) -> None:
+    profile = copy.deepcopy(load_profiles()["excel64_table_pivot_append_saved_sort_v1"])
+    del profile["environment"]["min_dotnet_runtime"]
+    monkeypatch.setattr(
+        "control_plane.capabilities.load_profiles",
+        lambda: {profile["id"]: profile},
+    )
+    # Certified runtime still passes.
+    admit_manifest(_production_append(), environment=_append_environment_dotnet("10.0.10"))
+    # Anything other than the exact pin -- even a newer runtime -- is
+    # rejected, exactly as before.
+    with pytest.raises(ContractError) as excinfo:
+        admit_manifest(_production_append(), environment=_append_environment_dotnet("10.0.11"))
+    assert excinfo.value.code == "CAPABILITY_PROFILE_INVALID"
+    assert any(failure["check"] == "dotnet_runtime" for failure in excinfo.value.details["failures"])
+
+
 def test_beta_label_is_impossible_without_complete_evidence() -> None:
     profile = copy.deepcopy(next(iter(load_profiles().values())))
     profile["status"] = "beta"

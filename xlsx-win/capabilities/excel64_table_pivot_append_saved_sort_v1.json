@@ -16,6 +16,7 @@
     "min_excel_build": "16.0.20313.20000",
     "office_bitness": "x64",
     "dotnet_runtime": "10.0.10",
+    "min_dotnet_runtime": "10.0.10",
     "locales": [
       "en-US"
     ],

@@ -136,6 +136,38 @@ def _check_excel_build(profile: dict, env: dict, actual: object, failures: list[
         )
 
 
+def _check_dotnet_runtime(profile: dict, env: dict, actual: object, failures: list[dict]) -> None:
+    """Admit ``dotnet_runtime`` against the profile's floor, or exact match.
+
+    Mirrors :func:`_check_excel_build` (WKFINOPS-435 pattern): with
+    ``min_dotnet_runtime`` declared, the floor is the gate and
+    ``dotnet_runtime`` is the certified value — a runtime at or above the floor
+    but different from the certified value proceeds with a WARN so drift is
+    visible in the run evidence. Without a floor, exact match remains the gate
+    (backward compatible). Motivation: .NET servicing auto-updates replace the
+    patch runtime in place (10.0.10 -> 10.0.11 on 2026-08-12 blocked ALL
+    production trend #7 jobs); a patch-level exact pin is guaranteed toil.
+    """
+    min_rt = env.get("min_dotnet_runtime")
+    if min_rt is None:
+        if actual != env["dotnet_runtime"]:
+            failures.append({"check": "dotnet_runtime", "actual": actual, "allowed": env["dotnet_runtime"]})
+        return
+    actual_tuple = _build_tuple(actual)
+    if actual_tuple is None or actual_tuple < _build_tuple(min_rt):
+        failures.append(
+            {"check": "dotnet_runtime", "actual": actual, "allowed": {"min_dotnet_runtime": min_rt}}
+        )
+        return
+    if actual != env["dotnet_runtime"]:
+        LOGGER.warning(
+            "uncertified .NET runtime %s (profile %s certifies %s); composite proof is the gate",
+            actual,
+            profile["id"],
+            env["dotnet_runtime"],
+        )
+
+
 def admit_manifest(
     manifest: dict,
     *,
@@ -218,7 +250,8 @@ def admit_manifest(
                     {"check": actual_name, "actual": environment.get(actual_name), "allowed": env[allowed_name]}
                 )
         _check_excel_build(profile, env, environment.get("excel_build"), failures)
-        for exact in ("office_bitness", "dotnet_runtime"):
+        _check_dotnet_runtime(profile, env, environment.get("dotnet_runtime"), failures)
+        for exact in ("office_bitness",):
             if environment.get(exact) != env[exact]:
                 failures.append({"check": exact, "actual": environment.get(exact), "allowed": env[exact]})
 

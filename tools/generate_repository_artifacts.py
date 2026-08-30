@@ -12,6 +12,9 @@ def load(root:Path)->dict[str,Any]:
 
 def groups(m): return {g['key']:g for g in m['policy']['catalog_groups']}
 def active(m): return [s for s in m['skills'] if s.get('status')!='archived']
+def installable(m):
+ statuses=set(m.get('policy',{}).get('installable_statuses',['supported','experimental']))
+ return [s for s in active(m) if s.get('status') in statuses]
 def notice(name): return f'<!-- Generated section: {name}. Source: {MANIFEST}. Generator: tools/generate_repository_artifacts.py. Do not edit by hand. -->'
 def fmt(xs): return ', '.join(f'`{x}`' for x in xs) if xs else '—'
 def source(s):
@@ -31,11 +34,11 @@ def catalog(m):
   for s in bg[g['key']]: out.append(f"| [`{s['name']}`](./{s['path']}) | {s['description']} | {source(s)} |")
  return '\n'.join(out)
 def installation(m):
- comps={s['name']:[] for s in active(m)}
+ comps={s['name']:[] for s in installable(m)}
  for c in m.get('shared_components',[]):
   for n in c.get('consumers',[]): comps.setdefault(n,[]).append(c['path'])
- out=[notice('installation inventory'),'','Only the entries below are installable. Their top-level skill directories are canonical; `scaffolds/` and `archive/` are excluded. Copy only the skills required by the target agent, plus listed shared components.','','| Skill | Canonical directory | Shared components |','| --- | --- | --- |']
- for s in sorted(active(m),key=lambda x:x['name']): out.append(f"| `{s['name']}` | [`{s['path']}`](./{s['path']}) | {fmt(comps.get(s['name'],[]))} |")
+ out=[notice('installation inventory'),'','Only supported or experimental entries below are installable. Deprecated skills remain cataloged for compatibility but are excluded from this inventory; `scaffolds/` and `archive/` are also excluded. Copy only the skills required by the target agent, plus listed shared components.','','| Skill | Canonical directory | Shared components |','| --- | --- | --- |']
+ for s in sorted(installable(m),key=lambda x:x['name']): out.append(f"| `{s['name']}` | [`{s['path']}`](./{s['path']}) | {fmt(comps.get(s['name'],[]))} |")
  return '\n'.join(out)
 def matrix(m):
  out=[notice('platform and agent matrix'),'','| Skill | Platforms | Agents | Status |','| --- | --- | --- | --- |']

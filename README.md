@@ -14,7 +14,7 @@ This provenance-and-purpose grouping explains **why content belongs here**. Plat
 
 ## Repository model
 
-`skills-manifest.json` is the operational source of truth for active and archived skill packages, catalog grouping, ownership, support, provenance classification, packaging, shared runtimes, validation, and generated agent mirrors. Each active skill has one canonical top-level directory. [`scaffolds/`](./scaffolds) contains documented non-skills; [`archive/`](./archive) contains non-installable historical packages. See [`docs/repository-contract.md`](./docs/repository-contract.md).
+`skills-manifest.json` is the operational authority for skill inventory, lifecycle, grouping, ownership, platform and agent support, packaging, shared runtimes, validation, and generated mirrors. [`.provenance/source-registry.json`](./.provenance/source-registry.json) is the authority for external source identity, immutable source revisions, license review, alignment metadata, and distribution boundaries. Source facts duplicated into the manifest are a CI-validated projection of that registry, not an independent authority. Each active skill has one canonical top-level directory. [`scaffolds/`](./scaffolds) contains documented non-skills; [`archive/`](./archive) contains non-installable historical packages. See [`docs/repository-contract.md`](./docs/repository-contract.md).
 
 ## Skill catalog
 
@@ -40,8 +40,8 @@ External agent workflows ported or substantially adapted for Codex conventions, 
 | [`adversarial-plan-review-codex`](./adversarial-plan-review-codex) | Use when a plan needs hostile review before execution, especially high-risk coding, business deliverables, migrations, no-git changes, weak validation, stale assumptions, rollback gaps, or plans that must be safe for another agent to execute. | medium adaptation; `dachent/cdc05151d047708c290bd4da0aaeed96` |
 | [`deep-planning-codex`](./deep-planning-codex) | Deprecated for GPT-5.6/Sol: use native Codex Plan Mode, with focused verification or adversarial review skills when needed. | heavy adaptation; `dachent/cdc05151d047708c290bd4da0aaeed96` |
 | [`grill-me-codex`](./grill-me-codex) | Use when the user says grill me, wants to stress-test a plan or design, needs a rigorous interview before committing to a decision, or asks for adversarial product, architecture, or implementation questions. | medium adaptation; `mattpocock/skills` |
-| [`grill-with-docs-codex`](./grill-with-docs-codex) | Use when the user wants to stress-test a plan against project terminology, domain language, CONTEXT.md, ADRs, existing docs, or code-backed architectural decisions. | medium adaptation; `mattpocock/skils` |
-| [`handoff-codex`](./handoff-codex) | Use when the user asks for a handoff, session summary, context packet, continuation note, or wants another agent or future session to pick up the current work. | medium adaptation; `mattpocock/skils` |
+| [`grill-with-docs-codex`](./grill-with-docs-codex) | Use when the user wants to stress-test a plan against project terminology, domain language, CONTEXT.md, ADRs, existing docs, or code-backed architectural decisions. | medium adaptation; `mattpocock/skills` |
+| [`handoff-codex`](./handoff-codex) | Use when the user asks for a handoff, session summary, context packet, continuation note, or wants another agent or future session to pick up the current work. | medium adaptation; `mattpocock/skills` |
 | [`repo-map-codex`](./repo-map-codex) | Deprecated for GPT-5.6/Sol: native Plan Mode performs read-first repository grounding and evidence collection. | medium adaptation; `dachent/cdc05151d047708c290bd4da0aaeed96` |
 | [`ultraplan-codex`](./ultraplan-codex) | Deprecated for GPT-5.6/Sol: use native Codex Plan Mode for grounded, decision-complete implementation plans. | heavy adaptation; `6missedcalls/ultraplan` |
 | [`verification-plan-codex`](./verification-plan-codex) | Use when a plan needs proof criteria before execution, especially coding changes, business deliverables, mixed business-coding projects, acceptance criteria, rollback triggers, manual checks, or final validation design. | medium adaptation; `dachent/cdc05151d047708c290bd4da0aaeed96` |
@@ -72,7 +72,7 @@ A coordinated set of visual design skills built around shared browser rendering,
 <!-- BEGIN GENERATED: installation-inventory -->
 <!-- Generated section: installation inventory. Source: skills-manifest.json. Generator: tools/generate_repository_artifacts.py. Do not edit by hand. -->
 
-Only the entries below are installable. Their top-level skill directories are canonical; `scaffolds/` and `archive/` are excluded. Copy only the skills required by the target agent, plus listed shared components.
+Only supported or experimental entries below are installable. Deprecated skills remain cataloged for compatibility but are excluded from this inventory; `scaffolds/` and `archive/` are also excluded. Copy only the skills required by the target agent, plus listed shared components.
 
 | Skill | Canonical directory | Shared components |
 | --- | --- | --- |
@@ -80,7 +80,6 @@ Only the entries below are installable. Their top-level skill directories are ca
 | `canvas-design-codex` | [`canvas-design-codex`](./canvas-design-codex) | `.shared/visual-runtime` |
 | `code-intelligence` | [`code-intelligence`](./code-intelligence) | — |
 | `code-mapper-skill` | [`code-mapper-skill`](./code-mapper-skill) | — |
-| `deep-planning-codex` | [`deep-planning-codex`](./deep-planning-codex) | — |
 | `document-handoff` | [`document-handoff`](./document-handoff) | — |
 | `docx-win` | [`docx-win`](./docx-win) | `.shared/office-com` |
 | `frontend-design-codex` | [`frontend-design-codex`](./frontend-design-codex) | `.shared/visual-runtime` |
@@ -88,8 +87,6 @@ Only the entries below are installable. Their top-level skill directories are ca
 | `grill-with-docs-codex` | [`grill-with-docs-codex`](./grill-with-docs-codex) | — |
 | `handoff-codex` | [`handoff-codex`](./handoff-codex) | — |
 | `pptx-win` | [`pptx-win`](./pptx-win) | `.shared/office-com` |
-| `repo-map-codex` | [`repo-map-codex`](./repo-map-codex) | — |
-| `ultraplan-codex` | [`ultraplan-codex`](./ultraplan-codex) | — |
 | `verification-plan-codex` | [`verification-plan-codex`](./verification-plan-codex) | — |
 | `web-artifacts-builder-codex` | [`web-artifacts-builder-codex`](./web-artifacts-builder-codex) | `.shared/visual-runtime` |
 | `xlsx-win` | [`xlsx-win`](./xlsx-win) | `.shared/office-com` |
@@ -214,10 +211,12 @@ The shared visual runtime uses a **render-inspect-lint-revise** loop and is chec
 
 ## Provenance and licensing
 
-The manifest records a source classification for every supported skill. Some pre-existing ports do not yet have an immutable upstream revision recorded; those entries explicitly declare the unresolved provenance state rather than inventing a revision. Repository-wide provenance, drift, and licensing completion is tracked separately in issue #43.
+`skills-manifest.json` owns package and lifecycle facts; `.provenance/source-registry.json` owns source, immutable revision, license-review, alignment, and distribution facts. Repository-integrity CI requires the manifest's materialized source fields to agree with the provenance registry, so source typos or stale revisions cannot silently pass as valid metadata.
 
-The repository does not currently publish a root `LICENSE`. Do not assume redistribution rights for the repository as a whole. Review each upstream license before repackaging or redistribution.
+The root [`LICENSE`](./LICENSE) is MIT and applies to material classified as `repo-owned-original`. It does **not** relicense external derivatives or unresolved local imports. Matt Pocock and UltraPlan derivatives retain their recorded MIT terms; Anthropic-derived Office skills retain their applicable upstream license boundaries; `deep_planning.txt` derivatives and `document-handoff` remain restricted while their original-source licensing is unresolved. See [`docs/licensing-and-redistribution.md`](./docs/licensing-and-redistribution.md) for the authoritative policy.
+
+Pinned revisions are reviewed baselines, not a claim that every adaptation automatically tracks upstream `main`. Scheduled drift checks identify upstream changes; pins move only after an explicit alignment review.
 
 ## Contributing
 
-Update `skills-manifest.json` whenever skill inventory, grouping, support, source, runtime, packaging, or validation changes. Document scaffolds under `scaffolds/` without skill metadata; move retired packages under `archive/` and mark them `archived` in the manifest. Then run the generator and check mode. CI fails when an active or archived skill is unregistered, a scaffold masquerades as a skill, generated README sections are stale, a declared mirror diverges, or undeclared files appear under `.claude/skills`.
+Update `skills-manifest.json` whenever skill inventory, grouping, support, runtime, packaging, or validation changes. Update `.provenance/source-registry.json` when source identity, pinned revision, license review, alignment, or distribution changes; then synchronize the manifest's source projection and regenerate repository artifacts. Document scaffolds under `scaffolds/` without skill metadata; move retired packages under `archive/` and mark them `archived` in the manifest. CI fails on inventory drift, manifest/provenance disagreement, stale generated README sections or mirrors, invalid metadata, or namespace violations.

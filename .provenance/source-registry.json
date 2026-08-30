@@ -1,10 +1,12 @@
 {
   "schema_version": 1,
-  "reviewed_on": "2026-07-19",
+  "reviewed_on": "2026-08-30",
   "repository_license": {
     "status": "mixed-license",
     "policy_document": "docs/licensing-and-redistribution.md",
-    "default_for_repo_owned_originals": "All rights reserved pending an explicit root license"
+    "root_license": "LICENSE",
+    "default_for_repo_owned_originals": "MIT",
+    "root_license_scope": "The root MIT license applies to repository-owned original material only; external derivatives and unresolved imports remain governed by their recorded source and distribution terms."
   },
   "sources": {
     "anthropic-skills": {
@@ -59,22 +61,175 @@
     }
   },
   "skills": {
-    "docx-win": {"classification":"heavy-adaptation","source":"anthropic-skills","source_path":"skills/docx","port_depth":"heavy","intentional_divergence":"Native Microsoft Word COM automation replaces generic document tooling.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"source-license-boundary"},
-    "pptx-win": {"classification":"heavy-adaptation","source":"anthropic-skills","source_path":"skills/pptx","port_depth":"heavy","intentional_divergence":"Native Microsoft PowerPoint COM automation and visual QA replace generic presentation tooling.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"source-license-boundary"},
-    "xlsx-win": {"classification":"heavy-adaptation","source":"anthropic-skills","source_path":"skills/xlsx","port_depth":"heavy","intentional_divergence":"Native Excel COM, Power Query, calculation, and refresh behavior replace generic spreadsheet tooling.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"source-license-boundary"},
-    "grill-me-codex": {"classification":"medium-adaptation","source":"mattpocock-skills","source_path":"skills/productivity/grill-me","port_depth":"medium","intentional_divergence":"Ported to Codex invocation, terminology, and tool contracts.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"MIT"},
-    "grill-with-docs-codex": {"classification":"medium-adaptation","source":"mattpocock-skills","source_path":"skills/engineering/grill-with-docs","port_depth":"medium","intentional_divergence":"Ported to Codex and repository-document grounding conventions.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"MIT"},
-    "handoff-codex": {"classification":"medium-adaptation","source":"mattpocock-skills","source_path":"skills/productivity/handoff","port_depth":"medium","intentional_divergence":"Ported to Codex handoff and continuation contracts.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"MIT"},
-    "ultraplan-codex": {"classification":"heavy-adaptation","source":"ultraplan","source_path":".","port_depth":"heavy","intentional_divergence":"Reworked into a Codex planning skill integrated with repository planning components.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"MIT"},
-    "adversarial-plan-review-codex": {"classification":"medium-adaptation","source":"deep-planning-import","source_path":"deep_planning.txt","port_depth":"medium","intentional_divergence":"Extracted adversarial review stage with Codex-specific execution safeguards.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"restricted"},
-    "deep-planning-codex": {"classification":"heavy-adaptation","source":"deep-planning-import","source_path":"deep_planning.txt","port_depth":"heavy","intentional_divergence":"Expanded into a gated Codex planning workflow with evidence and verification.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"restricted"},
-    "repo-map-codex": {"classification":"medium-adaptation","source":"deep-planning-import","source_path":"deep_planning.txt","port_depth":"medium","intentional_divergence":"Extracted repository mapping into a standalone Codex skill.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"restricted"},
-    "verification-plan-codex": {"classification":"medium-adaptation","source":"deep-planning-import","source_path":"deep_planning.txt","port_depth":"medium","intentional_divergence":"Extracted proof criteria and rollback design into a standalone Codex skill.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"restricted"},
-    "document-handoff": {"classification":"local-source-import","source":"document-handoff-import","source_path":"document-handoff","port_depth":"heavy","intentional_divergence":"Current Node implementation, provider extraction, rendering, privacy controls, and tests are repository-maintained.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"restricted"},
-    "code-intelligence": {"classification":"repo-owned-original","source":null,"source_path":null,"port_depth":"original","intentional_divergence":"Supported only as a Claude Code provider router; intentionally excluded from Codex GPT-5.6 Sol.","owner":"@dachent","last_alignment_review":"2026-07-19","distribution":"repository-policy"},
-    "code-mapper-skill": {"classification":"repo-owned-original","source":null,"source_path":null,"port_depth":"original","intentional_divergence":"Explicit session work root, local-only targets, no ambient installation, and consent-gated CodeQL writes support both Claude Code and Codex.","owner":"@dachent","last_alignment_review":"2026-07-19","distribution":"repository-policy"},
-    "canvas-design-codex": {"classification":"repo-owned-original","source":null,"source_path":null,"port_depth":"original","intentional_divergence":"Not applicable.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"repository-policy"},
-    "frontend-design-codex": {"classification":"repo-owned-original","source":null,"source_path":null,"port_depth":"original","intentional_divergence":"Not applicable.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"repository-policy"},
-    "web-artifacts-builder-codex": {"classification":"repo-owned-original","source":null,"source_path":null,"port_depth":"original","intentional_divergence":"Not applicable.","owner":"@dachent","last_alignment_review":"2026-07-12","distribution":"repository-policy"}
+    "docx-win": {
+      "classification": "heavy-adaptation",
+      "source": "anthropic-skills",
+      "source_path": "skills/docx",
+      "port_depth": "heavy",
+      "intentional_divergence": "Native Microsoft Word COM automation replaces generic document tooling.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "source-license-boundary"
+    },
+    "pptx-win": {
+      "classification": "heavy-adaptation",
+      "source": "anthropic-skills",
+      "source_path": "skills/pptx",
+      "port_depth": "heavy",
+      "intentional_divergence": "Native Microsoft PowerPoint COM automation and visual QA replace generic presentation tooling.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "source-license-boundary"
+    },
+    "xlsx-win": {
+      "classification": "heavy-adaptation",
+      "source": "anthropic-skills",
+      "source_path": "skills/xlsx",
+      "port_depth": "heavy",
+      "intentional_divergence": "Native Excel COM, Power Query, calculation, and refresh behavior replace generic spreadsheet tooling.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "source-license-boundary"
+    },
+    "grill-me-codex": {
+      "classification": "medium-adaptation",
+      "source": "mattpocock-skills",
+      "source_path": "skills/productivity/grill-me",
+      "port_depth": "medium",
+      "intentional_divergence": "Ported to Codex invocation, terminology, and tool contracts.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "grill-with-docs-codex": {
+      "classification": "medium-adaptation",
+      "source": "mattpocock-skills",
+      "source_path": "skills/engineering/grill-with-docs",
+      "port_depth": "medium",
+      "intentional_divergence": "Ported to Codex and repository-document grounding conventions.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "handoff-codex": {
+      "classification": "medium-adaptation",
+      "source": "mattpocock-skills",
+      "source_path": "skills/productivity/handoff",
+      "port_depth": "medium",
+      "intentional_divergence": "Ported to Codex handoff and continuation contracts.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "ultraplan-codex": {
+      "classification": "heavy-adaptation",
+      "source": "ultraplan",
+      "source_path": ".",
+      "port_depth": "heavy",
+      "intentional_divergence": "Reworked into a Codex planning skill integrated with repository planning components.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "adversarial-plan-review-codex": {
+      "classification": "medium-adaptation",
+      "source": "deep-planning-import",
+      "source_path": "deep_planning.txt",
+      "port_depth": "medium",
+      "intentional_divergence": "Extracted adversarial review stage with Codex-specific execution safeguards.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "restricted"
+    },
+    "deep-planning-codex": {
+      "classification": "heavy-adaptation",
+      "source": "deep-planning-import",
+      "source_path": "deep_planning.txt",
+      "port_depth": "heavy",
+      "intentional_divergence": "Expanded into a gated Codex planning workflow with evidence and verification.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "restricted"
+    },
+    "repo-map-codex": {
+      "classification": "medium-adaptation",
+      "source": "deep-planning-import",
+      "source_path": "deep_planning.txt",
+      "port_depth": "medium",
+      "intentional_divergence": "Extracted repository mapping into a standalone Codex skill.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "restricted"
+    },
+    "verification-plan-codex": {
+      "classification": "medium-adaptation",
+      "source": "deep-planning-import",
+      "source_path": "deep_planning.txt",
+      "port_depth": "medium",
+      "intentional_divergence": "Extracted proof criteria and rollback design into a standalone Codex skill.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "restricted"
+    },
+    "document-handoff": {
+      "classification": "local-source-import",
+      "source": "document-handoff-import",
+      "source_path": "document-handoff",
+      "port_depth": "heavy",
+      "intentional_divergence": "Current Node implementation, provider extraction, rendering, privacy controls, and tests are repository-maintained.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "restricted"
+    },
+    "code-intelligence": {
+      "classification": "repo-owned-original",
+      "source": null,
+      "source_path": null,
+      "port_depth": "original",
+      "intentional_divergence": "Supported only as a Claude Code provider router; intentionally excluded from Codex GPT-5.6 Sol.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-19",
+      "distribution": "MIT"
+    },
+    "code-mapper-skill": {
+      "classification": "repo-owned-original",
+      "source": null,
+      "source_path": null,
+      "port_depth": "original",
+      "intentional_divergence": "Explicit session work root, local-only targets, no ambient installation, and consent-gated CodeQL writes support both Claude Code and Codex.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-19",
+      "distribution": "MIT"
+    },
+    "canvas-design-codex": {
+      "classification": "repo-owned-original",
+      "source": null,
+      "source_path": null,
+      "port_depth": "original",
+      "intentional_divergence": "Not applicable.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "frontend-design-codex": {
+      "classification": "repo-owned-original",
+      "source": null,
+      "source_path": null,
+      "port_depth": "original",
+      "intentional_divergence": "Not applicable.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    },
+    "web-artifacts-builder-codex": {
+      "classification": "repo-owned-original",
+      "source": null,
+      "source_path": null,
+      "port_depth": "original",
+      "intentional_divergence": "Not applicable.",
+      "owner": "@dachent",
+      "last_alignment_review": "2026-07-12",
+      "distribution": "MIT"
+    }
   }
 }

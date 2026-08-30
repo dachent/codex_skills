@@ -41,7 +41,12 @@
         "title": "Codex design extension pack",
         "description": "A coordinated set of visual design skills built around shared browser rendering, evidence, and QA infrastructure."
       }
-    ]
+    ],
+    "installable_statuses": [
+      "supported",
+      "experimental"
+    ],
+    "provenance_registry": ".provenance/source-registry.json"
   },
   "shared_components": [
     {
@@ -89,7 +94,7 @@
         "classification": "medium-adaptation",
         "repository": "dachent/cdc05151d047708c290bd4da0aaeed96",
         "path": "deep_planning.txt",
-        "provenance_status": "revision-unresolved"
+        "revision": "0aadb9e28397b07a75853d40a78610bc21cebc81"
       },
       "validation": {
         "hosted_commands": [
@@ -257,7 +262,7 @@
         "classification": "heavy-adaptation",
         "repository": "dachent/cdc05151d047708c290bd4da0aaeed96",
         "path": "deep_planning.txt",
-        "provenance_status": "revision-unresolved"
+        "revision": "0aadb9e28397b07a75853d40a78610bc21cebc81"
       },
       "validation": {
         "hosted_commands": [
@@ -292,6 +297,7 @@
       },
       "source": {
         "classification": "local-source-import",
+        "path": "document-handoff",
         "initial_commit": "0aadb9e28397b07a75853d40a78610bc21cebc81",
         "provenance_status": "unresolved-original-source"
       },
@@ -399,7 +405,7 @@
         "classification": "medium-adaptation",
         "repository": "mattpocock/skills",
         "path": "skills/productivity/grill-me",
-        "provenance_status": "revision-unresolved"
+        "revision": "391a2701dd948f94f56a39f7533f8eea9a859c87"
       },
       "validation": {
         "hosted_commands": [],
@@ -430,9 +436,9 @@
       },
       "source": {
         "classification": "medium-adaptation",
-        "repository": "mattpocock/skils",
+        "repository": "mattpocock/skills",
         "path": "skills/engineering/grill-with-docs",
-        "provenance_status": "revision-unresolved"
+        "revision": "391a2701dd948f94f56a39f7533f8eea9a859c87"
       },
       "validation": {
         "hosted_commands": [],
@@ -463,9 +469,9 @@
       },
       "source": {
         "classification": "medium-adaptation",
-        "repository": "mattpocock/skils",
+        "repository": "mattpocock/skills",
         "path": "skills/productivity/handoff",
-        "provenance_status": "revision-unresolved"
+        "revision": "391a2701dd948f94f56a39f7533f8eea9a859c87"
       },
       "validation": {
         "hosted_commands": [],
@@ -537,7 +543,7 @@
         "classification": "medium-adaptation",
         "repository": "dachent/cdc05151d047708c290bd4da0aaeed96",
         "path": "deep_planning.txt",
-        "provenance_status": "revision-unresolved"
+        "revision": "0aadb9e28397b07a75853d40a78610bc21cebc81"
       },
       "validation": {
         "hosted_commands": [
@@ -572,7 +578,7 @@
         "classification": "heavy-adaptation",
         "repository": "6missedcalls/ultraplan",
         "path": ".",
-        "provenance_status": "revision-unresolved"
+        "revision": "06779940475f9c52b4d3b546d309b2c31ebbf8ea"
       },
       "validation": {
         "hosted_commands": [
@@ -607,7 +613,7 @@
         "classification": "medium-adaptation",
         "repository": "dachent/cdc05151d047708c290bd4da0aaeed96",
         "path": "deep_planning.txt",
-        "provenance_status": "revision-unresolved"
+        "revision": "0aadb9e28397b07a75853d40a78610bc21cebc81"
       },
       "validation": {
         "hosted_commands": [

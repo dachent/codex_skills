@@ -1,0 +1,60 @@
+name: Normalize repository authorities
+
+on:
+  push:
+    branches:
+      - audit/normalize-authorities-20260830
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Normalize manifest, provenance, licensing, and README
+        run: python tools/normalize_authorities_20260830.py
+
+      - name: Validate normalized authorities
+        run: |
+          python tools/validate_skill_manifest.py
+          python tools/validate_provenance.py
+          python tools/generate_repository_artifacts.py --check
+          python tools/test_generate_repository_artifacts.py
+          python tools/test_skill_manifest.py
+          python tools/test_scaffold_archive_contract.py
+          git diff --check
+
+      - name: Commit normalized repository state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Normalize manifest, provenance, licensing, and README"
+            git push origin HEAD:audit/normalize-authorities-20260830
+          fi
+
+      - name: Update repository summary when permitted
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DESCRIPTION='Cross-agent skills for Codex and Claude Code: Office automation, code intelligence, handoffs, planning, visual design, and repository tooling.'
+          if gh api --method PATCH "repos/${GITHUB_REPOSITORY}" -f description="$DESCRIPTION" >/dev/null 2>&1; then
+            echo "Repository description updated."
+          else
+            echo "::warning::The Actions token cannot edit repository metadata; update the GitHub About description separately."
+          fi
